@@ -78,12 +78,19 @@ function renderDays() {
 
 /* ---------- 설정 ---------- */
 function renderSettings() {
-  const e = examState();
+  const e = examState(), p = getProfile();   // getProfile은 onboard.js에 있어요
   let html = `<h1>설정</h1>`;
   if (rs.msg) html += `<div class="banner">${esc(rs.msg)}</div>`;
+  html += `<div class="card"><h2 style="margin-top:0">닉네임</h2>` +
+    `<input type="text" id="set-name" class="dateinput" maxlength="10" value="${esc(p.name || "")}">` +
+    `<div class="pager"><button type="button" class="primary" data-action="r-save-name">저장</button></div></div>`;
+  html += `<div class="card"><h2 style="margin-top:0">과목</h2><div class="seg">` +
+    SUBJECTS.map(s => `<button type="button" data-action="r-subject" data-value="${s}" class="${s === state.subject ? "on" : ""}">${s}</button>`).join("") +
+    `</div></div>`;
   html += `<div class="card"><h2 style="margin-top:0">시험일</h2>` +
     `<input type="date" id="exam-input" class="dateinput" value="${e.has ? e.exam : ""}">` +
     `<div class="pager"><button type="button" class="primary" data-action="r-save-exam">저장</button></div></div>`;
+  html += `<div class="card"><div class="pager" style="margin-top:0"><button type="button" data-action="r-intro">앱 소개 다시 보기</button></div></div>`;
   return html + renderDev();
 }
 
@@ -127,6 +134,16 @@ function roadmapAction(action, value) {
   };
   if (action === "r-day") {
     const i = Number(value); rs.sel = rs.sel === i ? null : i;
+  } else if (action === "r-subject") {
+    state.subject = value; state.mode = null; state.rangeMode = "all"; state.units = [];   // state는 app.js에 있어요
+    Store.set("subject", value); applyTheme(value);
+    rs.msg = "자유 학습 과목: " + value;
+  } else if (action === "r-save-name") {
+    const name = document.getElementById("set-name").value.trim();
+    if (!name) rs.msg = "닉네임을 입력해 주세요.";
+    else { Store.set("profile", Object.assign({}, getProfile(), { name: name, done: true })); rs.msg = "닉네임을 저장했어요."; }
+  } else if (action === "r-intro") {
+    startOnboard(); state.screen = "onboard";
   } else if (action === "r-save-exam") {
     const v = document.getElementById("exam-input").value;
     if (!isDate(v)) rs.msg = "시험일 날짜를 골라 주세요.";

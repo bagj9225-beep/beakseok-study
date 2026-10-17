@@ -183,3 +183,13 @@ body.studying #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .rchip { min-height: 40px; padding: 0 12px; border: 2px solid var(--line); border-radius: 999px; background: #fff; cursor: pointer; }
 .rchip.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
 .rchip span { margin-left: 6px; font-size: 12px; color: var(--muted); }
+
+/* ---- 11단계: 처음 실행 안내, 과목 표시 ---- */
+.sbadge { font-size: 13px; font-weight: 700; color: var(--accent); background: var(--accent-soft);
+  border-radius: 999px; padding: 3px 10px; vertical-align: middle; margin-left: 6px; }
+.ob { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; }
+.ob-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+.ob-text { font-size: 16px; line-height: 1.6; color: var(--muted); }
+.dots { display: flex; gap: 6px; justify-content: center; margin: 24px 0 8px; }
+.dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.dots i.on { background: var(--accent); }

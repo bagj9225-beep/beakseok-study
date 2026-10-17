@@ -44,7 +44,7 @@ function renderFlowButton() {
 function renderFlow() {
   if (fl.done) {
     const left = buildFlowQueue().length;
-    return `<div class="card done"><div class="big">여기까지 했어요</div><div class="sub">` +
+    return `<div class="card done"><div class="big">${getProfile().name ? esc(getProfile().name) + "님, " : ""}여기까지 했어요</div><div class="sub">` +
       `${fl.learned}개를 새로 학습했어요.` + (fl.wrong > 0 ? ` 틀린 ${fl.wrong}문제는 오답 복습에 저장했어요.` : "") +
       (left === 0 ? " 14일 일정의 학습을 모두 마쳤어요. 심화 문제는 다음 단계에서 이어져요." : " 남은 학습은 이어서 계속할 수 있어요.") +
       `</div><div class="pager"><button type="button" data-action="f-exit">로드맵으로</button>` +
