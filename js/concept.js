@@ -6,16 +6,20 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
-const cs = { list: [], i: 0, flipped: false, done: false, subject: "" };
+const cs = { list: [], i: 0, flipped: false, done: false, subject: "", units: null };
 
-function startConcept(subject) {
+function startConcept(subject, units) {   // units: 로드맵에서 시작할 때 그날 단원 목록 (없으면 전체)
   cs.subject = subject;
-  cs.list = Content.concepts.filter(x => x.subject === subject);
-  const saved = Store.get("pos.concept." + subject, 0);      // 마지막으로 본 위치
+  cs.units = units || null;
+  cs.list = Content.concepts.filter(x => x.subject === subject && (!units || units.includes(x.unit)));
+  const saved = units ? 0 : Store.get("pos.concept." + subject, 0);      // 마지막으로 본 위치
   cs.i = Number.isInteger(saved) && saved >= 0 && saved < cs.list.length ? saved : 0;
   cs.flipped = false;
   cs.done = false;
 }
+
+// 마지막 위치 저장 (로드맵에서 단원별로 시작한 학습은 저장하지 않아요)
+function savePos(n) { if (!cs.units) Store.set("pos.concept." + cs.subject, n); }
 
 // 뒷면을 본 카드를 "학습함"으로 기록해요. 처음 본 시각만 남기고, 다시 봐도 기록은 늘지 않아요.
 function markSeen(id) {
@@ -58,12 +62,12 @@ function conceptAction(action) {
     cs.flipped = !cs.flipped;
     if (cs.flipped) markSeen(cs.list[cs.i].id);
   } else if (action === "c-next") {
-    if (cs.i < cs.list.length - 1) { cs.i++; cs.flipped = false; Store.set("pos.concept." + cs.subject, cs.i); }
-    else { cs.done = true; Store.set("pos.concept." + cs.subject, 0); }
+    if (cs.i < cs.list.length - 1) { cs.i++; cs.flipped = false; savePos(cs.i); }
+    else { cs.done = true; savePos(0); }
   } else if (action === "c-prev") {
-    if (cs.i > 0) { cs.i--; cs.flipped = false; Store.set("pos.concept." + cs.subject, cs.i); }
+    if (cs.i > 0) { cs.i--; cs.flipped = false; savePos(cs.i); }
   } else if (action === "c-restart") {
-    cs.i = 0; cs.flipped = false; cs.done = false; Store.set("pos.concept." + cs.subject, 0);
+    cs.i = 0; cs.flipped = false; cs.done = false; savePos(0);
   } else if (action === "c-exit") {
     state.screen = "home";   // state는 app.js에 있어요
   } else {

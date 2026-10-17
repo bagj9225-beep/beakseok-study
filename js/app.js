@@ -1,10 +1,10 @@
-// 앱 담당: 화면 전환과 홈 화면을 그려요. (5단계: 오답 복습 연결)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (6단계: 시험일·로드맵 연결)
 
-// 학습 모드 목록. 심화 문제는 6단계에서 시험일 계산과 연결하기 전까지 잠가 둬요.
+// 학습 모드 목록. 심화 문제는 시험 4일 전부터 열려요 (modeLocked 참고).
 const MODES = [
   { id: "concept", name: "개념 카드",    desc: "앞뒤로 넘기며 익혀요",   unit: "장" },
   { id: "ox",      name: "OX 퀴즈",      desc: "풀고 바로 해설을 봐요",  unit: "문제" },
-  { id: "mcq",     name: "심화 5지선다", desc: "시험 4일 전부터 열려요", unit: "문제", locked: true },
+  { id: "mcq",     name: "심화 5지선다", desc: "시험 4일 전부터 열려요", unit: "문제" },
 ];
 
 const state = {
@@ -16,6 +16,8 @@ const state = {
 };
 if (!SUBJECTS.includes(state.subject)) state.subject = SUBJECTS[0];
 
+function modeLocked(md) { return md.id === "mcq" && !advancedOpen(); }   // advancedOpen은 dates.js에 있어요
+
 function countOf(modeId, subject) {
   const list = modeId === "concept" ? Content.concepts : modeId === "ox" ? Content.ox : Content.mcq;
   return list.filter(x => x.subject === subject).length;
@@ -23,9 +25,10 @@ function countOf(modeId, subject) {
 
 function renderHome() {
   const m = MODES.find(x => x.id === state.mode);
-  const canStart = m && !m.locked && countOf(m.id, state.subject) > 0;
+  const canStart = m && !modeLocked(m) && countOf(m.id, state.subject) > 0;
 
   let html = `<h1>학습 홈</h1><p class="sub">과목과 학습 방식을 고르세요.</p>`;
+  html += homeExamLine();   // 시험까지 D-day 한 줄 (roadmap.js)
   if (Content.problems.length) {
     html += `<div class="banner">콘텐츠 파일에 확인할 문제가 ${Content.problems.length}건 있어요.</div>`;
   }
@@ -36,10 +39,10 @@ function renderHome() {
 
   html += MODES.map(md => {
     const n = countOf(md.id, state.subject);
-    const cls = "mode" + (md.id === state.mode ? " on" : "") + (md.locked ? " locked" : "");
-    const badge = md.locked ? "잠김" : `${n}${md.unit}`;
+    const cls = "mode" + (md.id === state.mode ? " on" : "") + (modeLocked(md) ? " locked" : "");
+    const badge = modeLocked(md) ? "잠김" : `${n}${md.unit}`;
     return `<button type="button" data-action="mode" data-value="${md.id}" class="${cls}"` +
-      `${md.locked ? " aria-disabled=\"true\"" : ""}>` +
+      `${modeLocked(md) ? " aria-disabled=\"true\"" : ""}>` +
       `<span><div class="name">${md.name}</div><div class="desc">${md.desc}</div></span>` +
       `<span class="badge">${badge}</span></button>`;
   }).join("");
@@ -50,11 +53,6 @@ function renderHome() {
     `<span>오답 복습</span><span class="n">${wn}문제</span></button>`;
   if (state.note) html += `<div class="note">${state.note}</div>`;
   return html;
-}
-
-function renderRoadmap() {
-  return `<h1>학습 로드맵</h1><p class="sub">시험일과 날짜별 목표를 보여줄 화면이에요.</p>` +
-    `<div class="card">6단계에서 만들어요.</div>`;
 }
 
 function render() {
@@ -76,18 +74,19 @@ document.addEventListener("click", e => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
   const { action, value } = btn.dataset;
-  if (conceptAction(action) || oxAction(action, value)) { render(); window.scrollTo(0, 0); return; }   // 개념 카드는 concept.js, OX는 ox.js가 처리
+  if (conceptAction(action) || oxAction(action, value) || roadmapAction(action, value)) { render(); window.scrollTo(0, 0); return; }   // 개념 카드는 concept.js, OX는 ox.js, 로드맵은 roadmap.js가 처리
 
   if (action === "subject") {
     state.subject = value; state.note = "";
     Store.set("subject", value);
   } else if (action === "mode") {
     const md = MODES.find(x => x.id === value);
-    if (md.locked) { state.note = "심화 문제는 시험 4일 전부터 열려요."; state.mode = null; }
+    if (modeLocked(md)) { state.note = lockedNote(); state.mode = null; }
     else { state.mode = value; state.note = ""; }
   } else if (action === "start") {
     if (state.mode === "concept") { startConcept(state.subject); state.screen = "concept"; state.note = ""; }
     else if (state.mode === "ox") { startOx(state.subject); state.screen = "ox"; state.note = ""; }
+    else if (state.mode === "mcq") state.note = "심화 문제 풀이는 9단계에서 연결돼요.";
   }
   render();
 });
