@@ -1,0 +1,5 @@
+[
+  {"id":"ox-001","subject":"경제","unit":"경제 생활과 경제 문제","concept_id":"eco-c-001","question":"이미 써서 되찾을 수 없는 비용은 기회비용에 포함된다.","answer":false,"explanation":"되찾을 수 없는 비용은 매몰비용이며 선택에 고려하지 않는다.","difficulty":1},
+  {"id":"ox-002","subject":"경제","unit":"시장과 가격","concept_id":"eco-c-002","question":"다른 조건이 같을 때 가격이 오르면 수요량은 줄어든다.","answer":true,"explanation":"수요 법칙: 가격과 수요량은 반대 방향으로 움직인다.","difficulty":1},
+  {"id":"ox-003","subject":"정치","unit":"민주주의와 헌법","concept_id":"pol-c-001","question":"삼권 분립은 입법·행정·사법이 서로 견제하도록 하는 원리이다.","answer":true,"explanation":"권력을 나누고 서로 견제하게 하여 권력 남용을 막는다.","difficulty":1}
+]

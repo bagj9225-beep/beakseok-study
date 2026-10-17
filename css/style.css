@@ -1,0 +1,23 @@
+/* 디자인 값은 여기 변수에서만 바꿔요 */
+:root {
+  --bg: #F3F5F7;
+  --stone: #FFFFFF;
+  --ink: #1F2430;
+  --muted: #6B7280;
+  --line: #D9DEE4;
+  --ok: #2F8F6B;
+  --warn: #C2410C;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+#app { max-width: 480px; margin: 0 auto; padding: 24px 16px calc(24px + env(safe-area-inset-bottom)); }
+h1 { font-size: 22px; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+.card { background: var(--stone); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 12px; line-height: 1.5; }
+.card h2 { font-size: 15px; margin: 0 0 8px; }
+.ok { color: var(--ok); font-weight: 600; }
+.warn { color: var(--warn); font-weight: 600; }
+.list { margin: 8px 0 0; padding-left: 18px; font-size: 14px; }
