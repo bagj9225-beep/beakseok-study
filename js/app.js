@@ -1,4 +1,4 @@
-// 앱 담당: 화면 전환과 홈 화면을 그려요. (4단계: OX 퀴즈 연결)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (5단계: 오답 복습 연결)
 
 // 학습 모드 목록. 심화 문제는 6단계에서 시험일 계산과 연결하기 전까지 잠가 둬요.
 const MODES = [
@@ -45,6 +45,9 @@ function renderHome() {
   }).join("");
 
   html += `<button type="button" class="start" data-action="start"${canStart ? "" : " disabled"}>시작하기</button>`;
+  const wn = wrongCount(state.subject);   // 오답 개수 계산은 ox.js에 있어요
+  html += `<button type="button" class="review" data-action="review"${wn ? "" : " disabled"}>` +
+    `<span>오답 복습</span><span class="n">${wn}문제</span></button>`;
   if (state.note) html += `<div class="note">${state.note}</div>`;
   return html;
 }

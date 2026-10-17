@@ -101,3 +101,12 @@ body.studying #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .result .head.bad { color: var(--warn); }
 .result .lbl { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 10px; }
 .result .txt { font-size: 15px; }
+
+/* ---- 오답 복습 (5단계) ---- */
+.review { display: flex; align-items: center; justify-content: space-between; width: 100%;
+  min-height: 52px; margin-top: 10px; padding: 0 16px; font-size: 16px; font-weight: 600; cursor: pointer;
+  background: var(--stone); border: 2px solid var(--warn); border-radius: var(--radius); color: var(--warn); }
+.review .n { font-size: 14px; }
+.review:disabled { border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--warn);
+  border: 1px solid var(--warn); border-radius: 999px; padding: 1px 8px; margin-bottom: 8px; }
