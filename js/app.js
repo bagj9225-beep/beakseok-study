@@ -1,4 +1,4 @@
-// 앱 담당: 화면을 그려요. (2단계: 홈 화면 = 과목 선택 + 학습 모드 선택)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (3단계: 개념 카드 학습 연결)
 
 // 학습 모드 목록. 심화 문제는 6단계에서 시험일 계산과 연결하기 전까지 잠가 둬요.
 const MODES = [
@@ -9,6 +9,7 @@ const MODES = [
 
 const state = {
   tab: "home",
+  screen: "home",   // home(탭 화면) 또는 concept(개념 카드 학습 중)
   subject: Store.get("subject", "경제"),
   mode: null,
   note: "",
@@ -54,7 +55,10 @@ function renderRoadmap() {
 }
 
 function render() {
-  document.getElementById("view").innerHTML = state.tab === "home" ? renderHome() : renderRoadmap();
+  const studying = state.screen === "concept";
+  document.body.classList.toggle("studying", studying);   // 학습 중에는 아래 탭을 숨겨요
+  document.getElementById("view").innerHTML = studying ? renderConcept()
+    : (state.tab === "home" ? renderHome() : renderRoadmap());
   document.querySelectorAll("#tabbar .tab").forEach(b => b.classList.toggle("on", b.dataset.tab === state.tab));
 }
 
@@ -66,6 +70,7 @@ document.addEventListener("click", e => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
   const { action, value } = btn.dataset;
+  if (conceptAction(action)) { render(); window.scrollTo(0, 0); return; }   // 개념 카드 버튼은 concept.js가 처리
 
   if (action === "subject") {
     state.subject = value; state.note = "";
@@ -75,7 +80,8 @@ document.addEventListener("click", e => {
     if (md.locked) { state.note = "심화 문제는 시험 4일 전부터 열려요."; state.mode = null; }
     else { state.mode = value; state.note = ""; }
   } else if (action === "start") {
-    state.note = "학습 화면은 3단계에서 연결돼요.";
+    if (state.mode === "concept") { startConcept(state.subject); state.screen = "concept"; state.note = ""; }
+    else state.note = "OX 퀴즈는 4단계에서 연결돼요.";
   }
   render();
 });
