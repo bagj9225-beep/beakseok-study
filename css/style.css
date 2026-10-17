@@ -83,3 +83,21 @@ body.studying #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .pager button:disabled { background: var(--bg); color: var(--muted); cursor: not-allowed; }
 .done { text-align: center; padding: 28px 16px; }
 .done .big { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+
+/* ---- OX 퀴즈 화면 (4단계) ---- */
+.ox-q { margin-bottom: 12px; }
+.ox-q .unit { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.ox-q .q { font-size: 19px; font-weight: 700; line-height: 1.6; }
+.ox-btns { display: flex; gap: 10px; }
+.ox-btn { flex: 1; min-height: 96px; font-size: 40px; font-weight: 800; cursor: pointer;
+  background: var(--stone); border: 2px solid var(--line); border-radius: var(--radius); }
+.ox-btn:disabled { cursor: default; }
+.ox-btn.right { border-color: var(--ok); background: #E4F4EC; color: var(--ok); }
+.ox-btn.wrong { border-color: var(--warn); background: #FDECE4; color: var(--warn); }
+.ox-btn.dim { opacity: .45; }
+.result { margin-top: 12px; }
+.result .head { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.result .head.ok { color: var(--ok); }
+.result .head.bad { color: var(--warn); }
+.result .lbl { font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 10px; }
+.result .txt { font-size: 15px; }
