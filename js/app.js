@@ -1,6 +1,6 @@
-// 앱 담당: 화면 전환과 홈 화면을 그려요. (6단계: 시험일·로드맵 연결)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (7단계: 일일 목표·진도율 연결)
 
-// 학습 모드 목록. 심화 문제는 시험 4일 전부터 열려요 (modeLocked 참고).
+// 학습 모드 목록. 심화 문제는 14일 로드맵의 마지막 4일(11일차)부터 열려요 (modeLocked 참고).
 const MODES = [
   { id: "concept", name: "개념 카드",    desc: "앞뒤로 넘기며 익혀요",   unit: "장" },
   { id: "ox",      name: "OX 퀴즈",      desc: "풀고 바로 해설을 봐요",  unit: "문제" },
@@ -29,6 +29,7 @@ function renderHome() {
 
   let html = `<h1>학습 홈</h1><p class="sub">과목과 학습 방식을 고르세요.</p>`;
   html += homeExamLine();   // 시험까지 D-day 한 줄 (roadmap.js)
+  html += renderGoalCard(true);   // 오늘의 목표 간단 카드 (progress.js)
   if (Content.problems.length) {
     html += `<div class="banner">콘텐츠 파일에 확인할 문제가 ${Content.problems.length}건 있어요.</div>`;
   }

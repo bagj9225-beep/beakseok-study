@@ -3,8 +3,7 @@
 // 다음 날 학습은 미리 할 수 있고, 그 이후 날짜는 아직 잠겨 있어요.
 
 const rs = { open: null, editExam: false, msg: "" };
-const PLAN_DAYS = 14;      // 전체 일정
-const LEARN_DAYS = 10;     // 1~10일차: 새 단원 학습, 11~14일차: 총복습·심화
+const LEARN_DAYS = PLAN_DAYS - ADVANCED_LAST_DAYS;   // 1~10일차: 새 단원 학습, 11~14일차: 총복습·심화 (PLAN_DAYS는 dates.js)
 
 function weekday(s) { return ["일", "월", "화", "수", "목", "금", "토"][new Date(dayNum(s) * 86400000).getUTCDay()]; }
 function shortDate(s) { const p = s.split("-"); return Number(p[1]) + "/" + Number(p[2]) + "(" + weekday(s) + ")"; }
@@ -40,7 +39,10 @@ function dayProgress(plans, i) {
 function homeExamLine() {
   const e = examState();
   if (!e.has) return `<div class="card dline">시험일을 아직 정하지 않았어요. 로드맵 탭에서 정해 보세요.</div>`;
-  return `<div class="card dline"><b>${ddayText(e.d)}</b> · ${phaseText(e.d)}</div>`;
+  const day = roadmapDay();
+  let st = day === 0 ? "14일 로드맵 시작 전" : day > PLAN_DAYS ? "14일 일정 완료" : "로드맵 " + day + "일차";
+  if (advancedOpen()) st += " · 심화 열림";
+  return `<div class="card dline"><b>${ddayText(e.d)}</b> · ${st}</div>`;
 }
 
 function examForm(e) {
@@ -56,13 +58,14 @@ function renderRoadmap() {
   let html = `<h1>학습 로드맵</h1>`;
   if (rs.msg) html += `<div class="banner">${esc(rs.msg)}</div>`;
 
-  if (!e.has) return html + `<p class="sub">시험일을 알려 주면 남은 일수와 학습 일정을 보여줄게요.</p>` + examForm(e);
+  if (!e.has) return html + `<p class="sub">시험일을 알려 주면 남은 일수와 학습 일정을 보여줄게요.</p>` + examForm(e) + progressSections();
 
   html += `<div class="card"><div class="dday">${ddayText(e.d)}</div>` +
     `<div class="sub" style="margin:4px 0 0">시험일 ${shortDate(e.exam)} · 오늘 ${shortDate(kstToday())}</div>` +
     `<div style="margin-top:8px">${phaseText(e.d)}</div>` +
     `<div class="pager"><button type="button" data-action="r-edit-exam">시험일 바꾸기</button></div></div>`;
   if (rs.editExam) html += examForm(e);
+  html += progressSections();   // 오늘의 목표·전체 진도·목표 설정 (progress.js)
 
   const start = Store.get("roadmapStart", null);
   if (!isDate(start)) {
@@ -173,6 +176,10 @@ function roadmapAction(action, value) {
     const v = document.getElementById("dbg-input").value;
     if (isDate(v)) Store.set("debugToday", v); else rs.msg = "테스트 날짜를 골라 주세요.";
   } else if (action === "r-debug-clear") { Store.set("debugToday", null);
+  } else if (action === "r-save-goals") {
+    const c = Number(document.getElementById("goal-concept").value), q = Number(document.getElementById("goal-ox").value);
+    const ok = n => Number.isInteger(n) && n >= 1 && n <= 200;
+    if (ok(c) && ok(q)) Store.set("goals", { concept: c, ox: q }); else rs.msg = "목표는 1~200 사이 정수로 입력해 주세요.";
   } else { return false; }
   return true;
 }

@@ -132,3 +132,10 @@ body.studying #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .detail .subj { margin-top: 6px; font-size: 14px; }
 .detail .pager { margin-top: 8px; }
 .detail .pager button { min-height: 44px; font-size: 14px; }
+
+/* ---- 일일 목표·진도율 (7단계) ---- */
+.gpct { float: right; color: var(--accent); font-size: 18px; }
+.grow { display: flex; justify-content: space-between; font-size: 14px; margin: 10px 0 4px; }
+.gmsg { margin-top: 10px; font-size: 14px; }
+.gsmall { margin-top: 6px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+.goal .bar { height: 10px; }

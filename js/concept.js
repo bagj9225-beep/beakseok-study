@@ -6,11 +6,12 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
-const cs = { list: [], i: 0, flipped: false, done: false, subject: "", units: null };
+const cs = { list: [], i: 0, flipped: false, done: false, subject: "", units: null, rv: new Set() };
 
 function startConcept(subject, units) {   // units: 로드맵에서 시작할 때 그날 단원 목록 (없으면 전체)
   cs.subject = subject;
   cs.units = units || null;
+  cs.rv = new Set();   // 이번 학습에서 복습으로 센 카드 (같은 카드를 여러 번 뒤집어도 한 번만 세요)
   cs.list = Content.concepts.filter(x => x.subject === subject && (!units || units.includes(x.unit)));
   const saved = units ? 0 : Store.get("pos.concept." + subject, 0);      // 마지막으로 본 위치
   cs.i = Number.isInteger(saved) && saved >= 0 && saved < cs.list.length ? saved : 0;
@@ -24,7 +25,8 @@ function savePos(n) { if (!cs.units) Store.set("pos.concept." + cs.subject, n); 
 // 뒷면을 본 카드를 "학습함"으로 기록해요. 처음 본 시각만 남기고, 다시 봐도 기록은 늘지 않아요.
 function markSeen(id) {
   const seen = Store.get("seen.concept", {});
-  if (!seen[id]) { seen[id] = Date.now(); Store.set("seen.concept", seen); }
+  if (!seen[id]) { seen[id] = kstToday(); Store.set("seen.concept", seen); cs.rv.add(id); }   // 처음 학습한 날짜(한국 기준). 이번 학습 중 다시 뒤집어도 복습으로 세지 않아요
+  else if (!cs.rv.has(id)) { cs.rv.add(id); bumpReview("concept"); }          // 이미 학습한 카드는 복습으로만 기록
 }
 
 function renderConcept() {

@@ -48,7 +48,8 @@ function resetRun(review) {
 // 문제를 푼 기록. 처음 푼 시각만 남기고, 다시 풀어도 기록은 늘지 않아요. (7단계 진도율에서 사용)
 function markSolved(id) {
   const solved = Store.get("solved.ox", {});
-  if (!solved[id]) { solved[id] = Date.now(); Store.set("solved.ox", solved); }
+  if (!solved[id]) { solved[id] = kstToday(); Store.set("solved.ox", solved); }   // 처음 푼 날짜(한국 기준)
+  else bumpReview("ox");                                                          // 이미 푼 문제는 복습으로만 기록
 }
 
 /* ---------- 화면 ---------- */

@@ -23,18 +23,21 @@ function examState() {
   return { has: true, exam: exam, d: daysBetween(kstToday(), exam) };
 }
 
-const ADVANCED_OPEN_DAYS = 4;    // 시험 4일 전부터 심화 개방
-function advancedOpen() { const e = examState(); return e.has && e.d <= ADVANCED_OPEN_DAYS; }
+// 심화 문제는 시험일과 상관없이 14일 로드맵의 마지막 4일(11일차)부터 열려요.
+const PLAN_DAYS = 14, ADVANCED_LAST_DAYS = 4;
+const ADVANCED_FROM_DAY = PLAN_DAYS - ADVANCED_LAST_DAYS + 1;   // 11일차
+
+// 로드맵 시작일 기준으로 오늘이 몇 일차인지 (시작 전이면 0)
+function roadmapDay() {
+  const s = Store.get("roadmapStart", null);
+  return isDate(s) ? daysBetween(s, kstToday()) + 1 : 0;
+}
+function advancedOpen() { return roadmapDay() >= ADVANCED_FROM_DAY; }
 
 function ddayText(d) { return d > 0 ? "D-" + d : d === 0 ? "D-DAY" : "시험 끝 (D+" + (-d) + ")"; }
-function phaseText(d) {
-  if (d < 0) return "시험이 끝났어요.";
-  if (d <= ADVANCED_OPEN_DAYS) return "심화 문제가 열려 있어요.";
-  if (d <= 14) return "집중 학습 기간이에요. 심화 문제는 " + (d - ADVANCED_OPEN_DAYS) + "일 뒤에 열려요.";
-  return "자유 학습 기간이에요. 심화 문제는 " + (d - ADVANCED_OPEN_DAYS) + "일 뒤에 열려요.";
-}
+function phaseText(d) { return d < 0 ? "시험이 끝났어요." : d === 0 ? "오늘이 시험일이에요." : "시험까지 " + d + "일 남았어요."; }
 function lockedNote() {
-  const e = examState();
-  if (!e.has) return "시험일을 정하면 심화 문제가 열리는 날을 알 수 있어요. 로드맵 탭에서 정해 주세요.";
-  return "심화 문제는 시험 " + ADVANCED_OPEN_DAYS + "일 전부터 열려요. (" + (e.d - ADVANCED_OPEN_DAYS) + "일 뒤)";
+  const day = roadmapDay();
+  if (day === 0) return "심화 문제는 14일 로드맵의 마지막 " + ADVANCED_LAST_DAYS + "일(" + ADVANCED_FROM_DAY + "일차)부터 열려요. 로드맵 탭에서 시작해 보세요.";
+  return "심화 문제는 " + ADVANCED_FROM_DAY + "일차부터 열려요. (" + (ADVANCED_FROM_DAY - day) + "일 뒤)";
 }
