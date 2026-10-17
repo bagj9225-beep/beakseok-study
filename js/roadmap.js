@@ -41,7 +41,6 @@ function homeExamLine() {
   if (!e.has) return `<div class="card dline">시험일을 아직 정하지 않았어요. 로드맵 탭에서 정해 보세요.</div>`;
   const day = roadmapDay();
   let st = day === 0 ? "14일 로드맵 시작 전" : day > PLAN_DAYS ? "14일 일정 완료" : "로드맵 " + day + "일차";
-  if (advancedOpen()) st += " · 심화 열림";
   return `<div class="card dline"><b>${ddayText(e.d)}</b> · ${st}</div>`;
 }
 
@@ -70,7 +69,7 @@ function renderRoadmap() {
   const start = Store.get("roadmapStart", null);
   if (!isDate(start)) {
     html += `<div class="card"><h2 style="margin-top:0">14일 학습 로드맵</h2>` +
-      `<div class="sub">시작한 날이 1일차예요. 1~10일차에는 단원별로 새로 배우고, 11~14일차에는 총복습을 해요.` +
+      `<div class="sub">시작한 날이 1일차예요. 1~10일차에는 단원별로 새로 배우고, 11~14일차에는 총복습과 심화 문제를 다뤄요. 하루에 여러 일차를 이어서 해도 괜찮아요.` +
       (e.d >= 0 && e.d <= 14 ? " 지금이 시작하기 좋은 때예요." : "") + `</div>` +
       (e.d >= 0 ? `<button type="button" class="start" data-action="r-start">오늘부터 시작하기</button>` : "") + `</div>`;
   } else {
@@ -87,56 +86,34 @@ function renderDays(e, start) {
 
   let html = `<h2>일정</h2>`;
   html += todayDay > PLAN_DAYS
-    ? `<div class="sub">14일 일정이 끝났어요. 지난 일차는 언제든 다시 학습할 수 있어요.</div>`
-    : `<div class="sub">오늘은 ${todayDay}일차예요. 내일 학습은 미리 할 수 있어요.</div>`;
+    ? `<div class="sub">14일 일정이 끝났어요. 위의 동그라미 버튼으로 남은 학습을 이어갈 수 있어요.</div>`
+    : `<div class="sub">오늘은 ${todayDay}일차예요. 동그라미 버튼을 누르면 일정 순서대로 이어서 학습하고, 하루에 여러 일차를 해도 괜찮아요.</div>`;
 
   for (let i = 0; i < PLAN_DAYS; i++) {
     const date = addDays(start, i);
     const dayNo = i + 1;
-    const locked = dayNo > todayDay + 1;                 // 내일(todayDay+1)까지만 열려요
     const afterExam = date > e.exam;
     let tags = "";
     if (dayNo === todayDay) tags += `<span class="tag2 now">오늘</span>`;
-    else if (dayNo === todayDay + 1) tags += `<span class="tag2">내일 · 미리 학습</span>`;
     if (date === e.exam) tags += `<span class="tag2 warn2">시험일</span>`;
     else if (afterExam) tags += `<span class="tag2">시험 이후</span>`;
-    if (locked) tags += `<span class="tag2">잠김</span>`;
-    else if (i < LEARN_DAYS) {
+    let units;
+    if (i < LEARN_DAYS) {
       const p = dayProgress(plans, i);
       tags += p.total === 0 ? `<span class="tag2">복습일</span>`
         : p.done >= p.total ? `<span class="tag2 okk">완료</span>`
         : p.done > 0 ? `<span class="tag2">진행 중 ${p.done}/${p.total}</span>` : `<span class="tag2">시작 전</span>`;
-    } else tags += `<span class="tag2">총복습</span>`;
-
-    html += `<button type="button" class="day${dayNo === todayDay ? " today" : ""}${afterExam ? " dim" : ""}" data-action="r-day" data-value="${i}"${locked ? " disabled" : ""}>` +
-      `<span class="dn">${dayNo}일차</span><span class="dd">${shortDate(date)}</span><span class="tags">${tags}</span></button>`;
-    if (rs.open === i && !locked) html += renderDayDetail(plans, i);
+      units = SUBJECTS.filter(s => plans[s][i].length).map(s => s + ": " + plans[s][i].join(", ")).join(" / ") || "새로 배울 단원 없음";
+    } else {
+      tags += `<span class="tag2">총복습·심화</span>`;
+      units = "틀린 문제 복습과 심화 문제";
+    }
+    html += `<div class="day${dayNo === todayDay ? " today" : ""}${afterExam ? " dim" : ""}">` +
+      `<span class="dn">${dayNo}일차</span><span class="dd">${shortDate(date)}</span><span class="tags">${tags}</span>` +
+      `<div class="dunits">${esc(units)}</div></div>`;
   }
   html += `<div class="pager"><button type="button" data-action="r-restart">오늘부터 일정 다시 시작</button></div>`;
   return html;
-}
-
-function renderDayDetail(plans, i) {
-  let html = `<div class="card detail">`;
-  if (i < LEARN_DAYS) {
-    let any = false;
-    SUBJECTS.forEach(s => {
-      const u = plans[s][i];
-      if (!u.length) return;
-      any = true;
-      const nc = itemsIn(Content.concepts, s, u).length, nq = itemsIn(Content.ox, s, u).length;
-      html += `<div class="subj"><b>${s}</b> · ${esc(u.join(", "))}</div><div class="pager">` +
-        `<button type="button" data-action="r-study" data-value="concept|${s}|${i}"${nc ? "" : " disabled"}>개념 카드 ${nc}장</button>` +
-        `<button type="button" data-action="r-study" data-value="ox|${s}|${i}"${nq ? "" : " disabled"}>OX ${nq}문제</button></div>`;
-    });
-    if (!any) html += `<div class="txt">이 날은 새로 배울 단원이 없어요. 오답 복습이나 자유 학습을 해 보세요.</div>`;
-  } else {
-    html += `<div class="txt">총복습 기간이에요. 틀린 문제를 다시 풀어 보세요.</div><div class="pager">` +
-      SUBJECTS.map(s => { const n = wrongCount(s);
-        return `<button type="button" data-action="r-review" data-value="${s}"${n ? "" : " disabled"}>${s} 오답 ${n}문제</button>`; }).join("") +
-      `</div><div class="txt" style="margin-top:8px">심화 문제: ${advancedOpen() ? "열려 있어요 (풀이 화면은 9단계에서 연결돼요)" : esc(lockedNote())}</div>`;
-  }
-  return html + `</div>`;
 }
 
 function renderDebug() {
@@ -163,15 +140,6 @@ function roadmapAction(action, value) {
   } else if (action === "r-start") { Store.set("roadmapStart", kstToday()); rs.open = null;
   } else if (action === "r-restart") {
     if (window.confirm("오늘부터 14일 일정을 다시 시작할까요? 학습 기록은 그대로 남아요.")) { Store.set("roadmapStart", kstToday()); rs.open = null; }
-  } else if (action === "r-day") { const i = Number(value); rs.open = rs.open === i ? null : i;
-  } else if (action === "r-study") {
-    const p = value.split("|"), kind = p[0], subject = p[1], units = planFor(subject)[Number(p[2])];
-    if (kind === "concept") { startConcept(subject, units); if (!cs.list.length) { rs.msg = "이 날의 개념 카드가 없어요."; return true; } state.screen = "concept"; }
-    else { startOx(subject, units); if (!os.list.length) { rs.msg = "이 날의 OX 문제가 없어요."; return true; } state.screen = "ox"; }
-  } else if (action === "r-review") {
-    startOxReview(value);
-    if (!os.list.length) { rs.msg = "복습할 오답이 없어요."; return true; }
-    state.screen = "ox";
   } else if (action === "r-debug-set") {
     const v = document.getElementById("dbg-input").value;
     if (isDate(v)) Store.set("debugToday", v); else rs.msg = "테스트 날짜를 골라 주세요.";

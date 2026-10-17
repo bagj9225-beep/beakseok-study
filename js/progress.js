@@ -73,16 +73,17 @@ function barRow(label, now, goal) {
 // 오늘의 목표 카드. compact=true면 홈용 간단한 모양이에요.
 function renderGoalCard(compact) {
   const s = todayStats();
+  const sum = s.cGoal + s.qGoal, got = Math.min(s.cToday, s.cGoal) + Math.min(s.qToday, s.qGoal);   // 개념+문제를 합쳐서 보여줘요
   let msg;
   if (s.empty) msg = "새로 배울 내용을 모두 마쳤어요. 오답 복습이나 다시 보기를 해 보세요.";
   else if (s.pct >= 100) msg = "오늘 목표를 모두 채웠어요. 수고했어요.";
-  else msg = `목표까지 개념 ${Math.max(0, s.cGoal - s.cToday)}장, 문제 ${Math.max(0, s.qGoal - s.qToday)}개 남았어요.`;
+  else msg = `목표까지 ${Math.max(0, sum - got)}개 남았어요.`;
 
   let html = `<div class="card goal"><h2 style="margin-top:0">오늘의 목표 <span class="gpct">${s.pct}%</span></h2>` +
-    barRow("개념 카드", s.cToday, s.cGoal) + barRow("문제 풀이", s.qToday, s.qGoal) +
+    barRow("오늘 새로 학습", got, sum) +
     `<div class="gmsg">${msg}</div>`;
   if (!compact) {
-    html += `<div class="gsmall">복습: 개념 ${s.rev.concept}장 · 문제 ${s.rev.ox}개 · 복습 대기 오답 ${wrongTotal()}문제</div>` +
+    html += `<div class="gsmall">복습 ${s.rev.concept + s.rev.ox}개 · 복습 대기 오답 ${wrongTotal()}문제</div>` +
       `<div class="gsmall">오늘 목표는 오늘 처음 학습한 것만 세요. 복습은 목표에 더해지지 않아요.</div>`;
   }
   return html + `</div>`;
@@ -108,4 +109,4 @@ function renderGoalSettings() {
     `· OX 문제: 한 번 풀면 학습 완료 (정답·오답 무관)<br>· 같은 카드·문제를 다시 학습하면 복습으로만 기록돼요</div></div>`;
 }
 
-function progressSections() { return renderGoalCard(false) + renderOverallCard() + renderGoalSettings(); }
+function progressSections() { return renderGoalCard(false) + renderOverallCard() + renderFlowButton() + renderGoalSettings(); }

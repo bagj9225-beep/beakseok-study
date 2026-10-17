@@ -1,10 +1,10 @@
-// 앱 담당: 화면 전환과 홈 화면을 그려요. (7단계: 일일 목표·진도율 연결)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (8단계: 이어서 학습 연결)
 
-// 학습 모드 목록. 심화 문제는 14일 로드맵의 마지막 4일(11일차)부터 열려요 (modeLocked 참고).
+// 학습 모드 목록. 심화 문제는 14일 일정의 마지막 4일(11~14일차)에 다루지만, 접근을 막지는 않아요.
 const MODES = [
   { id: "concept", name: "개념 카드",    desc: "앞뒤로 넘기며 익혀요",   unit: "장" },
   { id: "ox",      name: "OX 퀴즈",      desc: "풀고 바로 해설을 봐요",  unit: "문제" },
-  { id: "mcq",     name: "심화 5지선다", desc: "시험 4일 전부터 열려요", unit: "문제" },
+  { id: "mcq",     name: "심화 5지선다", desc: "14일 일정의 마지막 4일에 다뤄요", unit: "문제" },
 ];
 
 const state = {
@@ -16,7 +16,7 @@ const state = {
 };
 if (!SUBJECTS.includes(state.subject)) state.subject = SUBJECTS[0];
 
-function modeLocked(md) { return md.id === "mcq" && !advancedOpen(); }   // advancedOpen은 dates.js에 있어요
+function modeLocked(md) { return false; }   // 심화 문제도 잠그지 않아요. 일정상 11~14일차에 다룰 뿐이에요.
 
 function countOf(modeId, subject) {
   const list = modeId === "concept" ? Content.concepts : modeId === "ox" ? Content.ox : Content.mcq;
@@ -62,6 +62,7 @@ function render() {
   let html;
   if (state.screen === "concept") html = renderConcept();
   else if (state.screen === "ox") html = renderOx();
+  else if (state.screen === "flow") html = renderFlow();
   else html = state.tab === "home" ? renderHome() : renderRoadmap();
   document.getElementById("view").innerHTML = html;
   document.querySelectorAll("#tabbar .tab").forEach(b => b.classList.toggle("on", b.dataset.tab === state.tab));
@@ -75,7 +76,7 @@ document.addEventListener("click", e => {
   const btn = e.target.closest("[data-action]");
   if (!btn || btn.disabled) return;
   const { action, value } = btn.dataset;
-  if (conceptAction(action) || oxAction(action, value) || roadmapAction(action, value)) { render(); window.scrollTo(0, 0); return; }   // 개념 카드는 concept.js, OX는 ox.js, 로드맵은 roadmap.js가 처리
+  if (conceptAction(action) || oxAction(action, value) || roadmapAction(action, value) || flowAction(action, value)) { render(); window.scrollTo(0, 0); return; }   // 개념 카드는 concept.js, OX는 ox.js, 로드맵은 roadmap.js가 처리
 
   if (action === "subject") {
     state.subject = value; state.note = "";
