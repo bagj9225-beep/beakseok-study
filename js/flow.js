@@ -95,7 +95,10 @@ function flowAction(action, value) {
   if (action.indexOf("f-") !== 0) return false;
   const it = fl.q[fl.i];
   if (action === "f-start") {
-    if (startFlow() > 0) state.screen = "flow";               // state는 app.js에 있어요
+    if (startFlow() > 0) {
+      if (!isDate(Store.get("roadmapStart", null))) Store.set("roadmapStart", kstToday());   // 처음 누른 날이 1일차
+      state.screen = "flow";                                   // state는 app.js에 있어요
+    }
   } else if (action === "f-flip") {
     fl.shown = !fl.shown;
     if (fl.shown) { markSeen(it.id); if (!fl.saw) { fl.saw = true; fl.learned++; } }

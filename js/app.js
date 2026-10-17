@@ -1,4 +1,4 @@
-// 앱 담당: 화면 전환과 홈 화면을 그려요. (8단계: 이어서 학습 연결)
+// 앱 담당: 화면 전환과 홈 화면을 그려요. (9단계: 학습 홈 = 일정 중심, 자유 학습 = 부가 탭)
 
 // 학습 모드 목록. 심화 문제는 14일 일정의 마지막 4일(11~14일차)에 다루지만, 접근을 막지는 않아요.
 const MODES = [
@@ -23,13 +23,11 @@ function countOf(modeId, subject) {
   return list.filter(x => x.subject === subject).length;
 }
 
-function renderHome() {
+function renderFree() {   // 자유 학습 탭: 원하는 개념 카드·OX를 골라서 학습
   const m = MODES.find(x => x.id === state.mode);
   const canStart = m && !modeLocked(m) && countOf(m.id, state.subject) > 0;
 
-  let html = `<h1>학습 홈</h1><p class="sub">과목과 학습 방식을 고르세요.</p>`;
-  html += homeExamLine();   // 시험까지 D-day 한 줄 (roadmap.js)
-  html += renderGoalCard(true);   // 오늘의 목표 간단 카드 (progress.js)
+  let html = `<h1>자유 학습</h1><p class="sub">원하는 과목과 학습 방식을 직접 골라요.</p>`;
   if (Content.problems.length) {
     html += `<div class="banner">콘텐츠 파일에 확인할 문제가 ${Content.problems.length}건 있어요.</div>`;
   }
@@ -63,7 +61,7 @@ function render() {
   if (state.screen === "concept") html = renderConcept();
   else if (state.screen === "ox") html = renderOx();
   else if (state.screen === "flow") html = renderFlow();
-  else html = state.tab === "home" ? renderHome() : renderRoadmap();
+  else html = state.tab === "home" ? renderHome() : renderFree();   // renderHome은 roadmap.js에 있어요
   document.getElementById("view").innerHTML = html;
   document.querySelectorAll("#tabbar .tab").forEach(b => b.classList.toggle("on", b.dataset.tab === state.tab));
 }
@@ -88,7 +86,7 @@ document.addEventListener("click", e => {
   } else if (action === "start") {
     if (state.mode === "concept") { startConcept(state.subject); state.screen = "concept"; state.note = ""; }
     else if (state.mode === "ox") { startOx(state.subject); state.screen = "ox"; state.note = ""; }
-    else if (state.mode === "mcq") state.note = "심화 문제 풀이는 9단계에서 연결돼요.";
+    else if (state.mode === "mcq") state.note = "심화 문제 풀이는 아직 준비 중이에요.";
   }
   render();
 });

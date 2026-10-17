@@ -6,13 +6,7 @@
 // - 오늘 목표는 오늘 "새로" 학습한 개수만 세요. 남은 새 학습이 목표보다 적으면 목표를 그만큼 줄여서 계산해요.
 // - 아직 풀 수 없는 심화 문제는 진도율에 넣지 않아요. (9단계에서 추가)
 
-const DEFAULT_GOALS = { concept: 10, ox: 20 };
-
-function getGoals() {
-  const g = Store.get("goals", {});
-  const ok = n => Number.isInteger(n) && n >= 1 && n <= 200;
-  return { concept: ok(g.concept) ? g.concept : DEFAULT_GOALS.concept, ox: ok(g.ox) ? g.ox : DEFAULT_GOALS.ox };
-}
+function getGoals() { return DAILY_GOAL; }   // 하루 목표는 config.js의 DAILY_GOAL에서 가져와요
 
 // 기록에 적힌 날짜 읽기. 새 기록은 "2026-10-20" 같은 글자, 예전 기록(1~6단계)은 시각 숫자라서 둘 다 처리해요.
 function learnedDate(v) {
@@ -49,21 +43,6 @@ function todayStats() {
   return { cToday: cToday, cGoal: cGoal, qToday: qToday, qGoal: qGoal, pct: pct, empty: goalSum === 0, rev: getReview(t) };
 }
 
-// 전체 진도율: 새로 학습한 서로 다른 카드·문제 수 / 전체 수
-function overallStats() {
-  const seen = Store.get("seen.concept", {}), solved = Store.get("solved.ox", {});
-  const per = {};
-  let done = 0, total = 0;
-  SUBJECTS.forEach(s => {
-    const cs_ = Content.concepts.filter(x => x.subject === s), qs = Content.ox.filter(x => x.subject === s);
-    const d = cs_.filter(x => seen[x.id]).length + qs.filter(x => solved[x.id]).length;
-    const n = cs_.length + qs.length;
-    per[s] = { done: d, total: n, pct: n ? Math.round(d / n * 100) : 0 };
-    done += d; total += n;
-  });
-  return { done: done, total: total, pct: total ? Math.round(done / total * 100) : 0, per: per };
-}
-
 function barRow(label, now, goal) {
   const pct = goal > 0 ? Math.min(100, Math.round(now / goal * 100)) : 100;
   return `<div class="grow"><span>${label}</span><span>${goal > 0 ? now + " / " + goal : "완료"}</span></div>` +
@@ -88,25 +67,3 @@ function renderGoalCard(compact) {
   }
   return html + `</div>`;
 }
-
-function renderOverallCard() {
-  const o = overallStats();
-  return `<div class="card"><h2 style="margin-top:0">전체 진도 <span class="gpct">${o.pct}%</span></h2>` +
-    `<div class="bar"><i style="width:${o.pct}%"></i></div>` +
-    `<div class="gsmall" style="margin-top:6px">지금까지 처음 학습한 카드·문제 ${o.done} / ${o.total}개</div>` +
-    SUBJECTS.map(s => `<div class="grow"><span>${s}</span><span>${o.per[s].done} / ${o.per[s].total}</span></div>` +
-      `<div class="bar"><i style="width:${o.per[s].pct}%"></i></div>`).join("") + `</div>`;
-}
-
-function renderGoalSettings() {
-  const g = getGoals();
-  return `<div class="card"><h2 style="margin-top:0">일일 목표 정하기</h2>` +
-    `<div class="sub">하루에 새로 학습할 개수예요. 언제든 바꿀 수 있고, 기록은 그대로 남아요. (1~200)</div>` +
-    `<div class="grow"><span>개념 카드</span></div><input type="number" id="goal-concept" class="dateinput" min="1" max="200" value="${g.concept}">` +
-    `<div class="grow" style="margin-top:8px"><span>문제 풀이</span></div><input type="number" id="goal-ox" class="dateinput" min="1" max="200" value="${g.ox}">` +
-    `<div class="pager"><button type="button" class="primary" data-action="r-save-goals">저장</button></div>` +
-    `<div class="gsmall" style="margin-top:10px">학습 완료 기준<br>· 개념 카드: 뒷면을 확인하면 학습 완료<br>` +
-    `· OX 문제: 한 번 풀면 학습 완료 (정답·오답 무관)<br>· 같은 카드·문제를 다시 학습하면 복습으로만 기록돼요</div></div>`;
-}
-
-function progressSections() { return renderGoalCard(false) + renderOverallCard() + renderFlowButton() + renderGoalSettings(); }
