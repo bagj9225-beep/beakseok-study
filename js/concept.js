@@ -6,21 +6,23 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
-const cs = { list: [], i: 0, flipped: false, done: false, subject: "", units: null, rv: new Set() };
+const cs = { list: [], i: 0, flipped: false, done: false, subject: "", units: null, scoped: false, rv: new Set() };
 
-function startConcept(subject, units) {   // units: 로드맵에서 시작할 때 그날 단원 목록 (없으면 전체)
+function startConcept(subject, units, onlySeen) {   // units: 특정 단원만(없으면 전체), onlySeen: 이미 학습한 카드만(복습)
   cs.subject = subject;
   cs.units = units || null;
+  cs.scoped = !!(units || onlySeen);   // 범위를 고르거나 복습일 때는 마지막 위치를 저장하지 않아요
+  const seenNow = Store.get("seen.concept", {});
   cs.rv = new Set();   // 이번 학습에서 복습으로 센 카드 (같은 카드를 여러 번 뒤집어도 한 번만 세요)
-  cs.list = Content.concepts.filter(x => x.subject === subject && (!units || units.includes(x.unit)));
-  const saved = units ? 0 : Store.get("pos.concept." + subject, 0);      // 마지막으로 본 위치
+  cs.list = Content.concepts.filter(x => x.subject === subject && (!units || units.includes(x.unit)) && (!onlySeen || seenNow[x.id]));
+  const saved = cs.scoped ? 0 : Store.get("pos.concept." + subject, 0);      // 마지막으로 본 위치
   cs.i = Number.isInteger(saved) && saved >= 0 && saved < cs.list.length ? saved : 0;
   cs.flipped = false;
   cs.done = false;
 }
 
 // 마지막 위치 저장 (로드맵에서 단원별로 시작한 학습은 저장하지 않아요)
-function savePos(n) { if (!cs.units) Store.set("pos.concept." + cs.subject, n); }
+function savePos(n) { if (!cs.scoped) Store.set("pos.concept." + cs.subject, n); }
 
 // 뒷면을 본 카드를 "학습함"으로 기록해요. 처음 본 시각만 남기고, 다시 봐도 기록은 늘지 않아요.
 function markSeen(id) {

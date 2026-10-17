@@ -36,11 +36,9 @@ function renderFlowButton() {
   const q = buildFlowQueue(), n = q.length;
   const started = Object.keys(Store.get("seen.concept", {})).length + Object.keys(Store.get("solved.ox", {})).length > 0;
   const label = n === 0 ? "모두<br>완료" : started ? "이어서<br>학습" : "학습<br>시작";
-  const cap = n === 0 ? "일정의 학습과 복습을 모두 마쳤어요."
-    : "남은 학습 " + n + "개 · 다음: " + (q[0].review ? "총복습" : (q[0].day + 1) + "일차 · " + esc(q[0].unit));
+  const cap = n === 0 ? "모두 마쳤어요" : "남은 " + n + "개 · " + (q[0].review ? "총복습" : (q[0].day + 1) + "일차");
   return `<div class="circlewrap"><button type="button" class="circle" data-action="f-start"${n === 0 ? " disabled" : ""}>${label}</button>` +
-    `<div class="ccap">${cap}</div>` +
-    `<div class="gsmall">일정 순서대로 이어서 학습해요. 하루에 여러 일차를 해도 괜찮아요.</div></div>`;
+    `<div class="ccap">${cap}</div></div>`;
 }
 
 function renderFlow() {

@@ -1,7 +1,7 @@
 // OX 퀴즈 담당: 문제 보여주기, 채점, 즉시 해설, 오답 저장·복습. (4~5단계)
 // 화면 전환 상태(state)는 app.js가 맡고, 글자를 안전하게 넣는 esc()는 concept.js에 있어요.
 
-const os = { list: [], i: 0, picked: null, correct: 0, wrong: 0, done: false, subject: "", review: false, units: null };
+const os = { list: [], i: 0, picked: null, correct: 0, wrong: 0, done: false, subject: "", review: false, units: null, onlySolved: false };
 
 /* ---------- 오답 저장소 ----------
    저장 모양: { "ox-001": { n: 틀린 횟수, last: 마지막으로 틀린 시각 } }
@@ -24,15 +24,18 @@ function wrongItems(subject) {
 function wrongCount(subject) { return wrongItems(subject).length; }
 
 /* ---------- 시작 ---------- */
-function startOx(subject, units) {   // units: 로드맵에서 시작할 때 그날 단원 목록 (없으면 전체)
+function startOx(subject, units, onlySolved) {   // units: 특정 단원만(없으면 전체), onlySolved: 이미 푼 문제만(복습)
   os.subject = subject;
   os.units = units || null;
-  os.list = Content.ox.filter(x => x.subject === subject && (!units || units.includes(x.unit)));
+  os.onlySolved = !!onlySolved;
+  const solvedNow = Store.get("solved.ox", {});
+  os.list = Content.ox.filter(x => x.subject === subject && (!units || units.includes(x.unit)) && (!onlySolved || solvedNow[x.id]));
   resetRun(false);
 }
 function startOxReview(subject) {
   os.subject = subject;
   os.units = null;
+  os.onlySolved = false;
   os.list = wrongItems(subject);
   resetRun(true);
 }
@@ -136,7 +139,7 @@ function oxAction(action, value) {
     if (os.i < os.list.length - 1) { os.i++; os.picked = null; }
     else os.done = true;
   } else if (action === "o-restart") {
-    if (os.review) startOxReview(os.subject); else startOx(os.subject, os.units);
+    if (os.review) startOxReview(os.subject); else startOx(os.subject, os.units, os.onlySolved);
     if (os.list.length === 0) state.screen = "home";
   } else if (action === "o-exit") {
     state.screen = "home";   // state는 app.js에 있어요

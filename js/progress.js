@@ -43,27 +43,14 @@ function todayStats() {
   return { cToday: cToday, cGoal: cGoal, qToday: qToday, qGoal: qGoal, pct: pct, empty: goalSum === 0, rev: getReview(t) };
 }
 
-function barRow(label, now, goal) {
-  const pct = goal > 0 ? Math.min(100, Math.round(now / goal * 100)) : 100;
-  return `<div class="grow"><span>${label}</span><span>${goal > 0 ? now + " / " + goal : "완료"}</span></div>` +
-    `<div class="bar"><i style="width:${pct}%"></i></div>`;
-}
-
-// 오늘의 목표 카드. compact=true면 홈용 간단한 모양이에요.
-function renderGoalCard(compact) {
+// 홈에 쓰는 오늘 목표 그래프: 동그란 달성률 + 개수 (개념과 문제를 합쳐서 보여줘요)
+function renderGoalMini() {
   const s = todayStats();
-  const sum = s.cGoal + s.qGoal, got = Math.min(s.cToday, s.cGoal) + Math.min(s.qToday, s.qGoal);   // 개념+문제를 합쳐서 보여줘요
-  let msg;
-  if (s.empty) msg = "새로 배울 내용을 모두 마쳤어요. 오답 복습이나 다시 보기를 해 보세요.";
-  else if (s.pct >= 100) msg = "오늘 목표를 모두 채웠어요. 수고했어요.";
-  else msg = `목표까지 ${Math.max(0, sum - got)}개 남았어요.`;
-
-  let html = `<div class="card goal"><h2 style="margin-top:0">오늘의 목표 <span class="gpct">${s.pct}%</span></h2>` +
-    barRow("오늘 새로 학습", got, sum) +
-    `<div class="gmsg">${msg}</div>`;
-  if (!compact) {
-    html += `<div class="gsmall">복습 ${s.rev.concept + s.rev.ox}개 · 복습 대기 오답 ${wrongTotal()}문제</div>` +
-      `<div class="gsmall">오늘 목표는 오늘 처음 학습한 것만 세요. 복습은 목표에 더해지지 않아요.</div>`;
-  }
-  return html + `</div>`;
+  const sum = s.cGoal + s.qGoal, got = Math.min(s.cToday, s.cGoal) + Math.min(s.qToday, s.qGoal);
+  const r = 38, c = 2 * Math.PI * r, off = c * (1 - s.pct / 100);
+  return `<div class="card gbox"><svg viewBox="0 0 100 100" class="ring" role="img" aria-label="오늘 목표 ${s.pct}%">` +
+    `<circle cx="50" cy="50" r="${r}" class="ring-bg"/>` +
+    `<circle cx="50" cy="50" r="${r}" class="ring-fg" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 50 50)"/>` +
+    `<text x="50" y="57" text-anchor="middle" class="ring-t">${s.pct}%</text></svg>` +
+    `<div class="gnum">${sum === 0 ? "모두 완료" : got + " / " + sum}</div></div>`;
 }
