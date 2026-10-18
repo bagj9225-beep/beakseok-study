@@ -7,6 +7,7 @@ const state = {
   sub: "learn",      // 자유 학습: learn(학습) / review(복습)
   subject: Store.get("subject", SUBJECTS[0]),   // 자유 학습 과목 (설정 탭에서 바꿔요)
   units: [],         // 자유 학습 범위: 고른 단원들 (비어 있으면 전체)
+  rangeOpen: false,  // 자유 학습 범위 목록이 펼쳐졌는지
   devOpen: false, devDay: 1,   // 개발용 도구
 };
 if (!SUBJECTS.includes(state.subject)) state.subject = SUBJECTS[0];

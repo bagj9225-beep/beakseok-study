@@ -19,19 +19,19 @@ function planFor(subject) {
 }
 function allPlans() { const p = {}; SUBJECTS.forEach(s => { p[s] = planFor(s); }); return p; }
 
-// 한 일차에 배정된 항목들 (과목 순서 → 단원 순서 → 개념 카드 먼저, 그다음 문제)
-function dayItems(i, plans) {
+// 한 일차에 배정된 항목들 (과목 순서 → 단원 순서 → 개념 카드 먼저, 그다음 문제). subjects를 주면 그 과목만.
+function dayItems(i, plans, subjects) {
   plans = plans || allPlans();
   const out = [];
   const types = i < LEARN_DAYS ? ["concept", "ox"] : ["mcq"];
-  SUBJECTS.forEach(s => plans[s][i].forEach(unit => types.forEach(t =>
+  (subjects || SUBJECTS).forEach(s => plans[s][i].forEach(unit => types.forEach(t =>
     Content[TYPE_LIST[t]].filter(x => x.subject === s && x.unit === unit)
       .forEach(x => out.push({ type: t, id: x.id, day: i, unit: unit })))));
   return out;
 }
 
-function dayProgress(i, plans) {
-  const items = dayItems(i, plans);
+function dayProgress(i, plans, subjects) {
+  const items = dayItems(i, plans, subjects);
   return { total: items.length, done: items.filter(it => isLearned(it.type, it.id)).length };
 }
 
@@ -45,12 +45,12 @@ function currentDay(plans) {
   return -1;
 }
 
-// 동그라미 버튼의 학습 순서: 1~10일차의 안 한 것 → 오답 총복습 → 11~14일차의 안 푼 심화
-function flowQueue() {
-  const plans = allPlans(), q = [], ids = new Set();
+// 동그라미 버튼의 학습 순서 (한 과목씩): 1~10일차의 안 한 것 → 오답 총복습 → 11~14일차의 안 푼 심화
+function flowQueue(subject) {
+  const plans = allPlans(), q = [], ids = new Set(), only = [subject];
   const add = it => { if (!ids.has(it.id)) { ids.add(it.id); q.push(it); } };
-  for (let d = 0; d < LEARN_DAYS; d++) dayItems(d, plans).filter(it => !isLearned(it.type, it.id)).forEach(add);
-  wrongItems().forEach(x => add({ type: x._type, id: x.id, day: LEARN_DAYS, unit: x.unit, review: true }));
-  for (let d = LEARN_DAYS; d < PLAN_DAYS; d++) dayItems(d, plans).filter(it => !isLearned(it.type, it.id)).forEach(add);
+  for (let d = 0; d < LEARN_DAYS; d++) dayItems(d, plans, only).filter(it => !isLearned(it.type, it.id)).forEach(add);
+  wrongItems(subject).forEach(x => add({ type: x._type, id: x.id, day: LEARN_DAYS, unit: x.unit, review: true }));
+  for (let d = LEARN_DAYS; d < PLAN_DAYS; d++) dayItems(d, plans, only).filter(it => !isLearned(it.type, it.id)).forEach(add);
   return q;
 }

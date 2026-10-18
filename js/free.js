@@ -21,18 +21,27 @@ function freeUnits() {
     FREE_TYPES.some(t => Content[TYPE_LIST[t.type]].some(x => x.subject === state.subject && x.unit === u && isLearned(t.type, x.id))));
 }
 
+// 범위: 평소에는 "범위 · 전체 ▾" 한 줄, 누르면 단원 체크 목록이 펼쳐져요
+function renderRange() {
+  const units = freeUnits(), n = state.units.length;
+  const label = n === 0 ? "전체" : n === 1 ? state.units[0] : n + "개 단원";
+  const row = (action, value, text, on) => `<button type="button" class="check${on ? " on" : ""}" data-action="${action}"` +
+    (value ? ` data-value="${esc(value)}"` : "") + ` aria-pressed="${on}"><span class="box" aria-hidden="true"></span>${esc(text)}</button>`;
+  return `<button type="button" class="range-btn${state.rangeOpen ? " open" : ""}" data-action="fr-range" aria-expanded="${state.rangeOpen}">` +
+    `<span>범위</span><b>${esc(label)}</b><span class="arrow" aria-hidden="true">▾</span></button>` +
+    (!state.rangeOpen ? "" : `<div class="range-list">` + (units.length
+      ? row("fr-all", "", "전체", n === 0) + units.map(u => row("fr-unit", u, u, state.units.includes(u))).join("") +
+        `<div class="pager"><button type="button" class="primary" data-action="fr-range">완료</button></div>`
+      : `<div class="empty">아직 학습한 내용이 없어요</div>`) + `</div>`);
+}
+
 function renderFree() {
   const review = state.sub === "review";
   let html = `<h1>자유 학습 <button type="button" class="sbadge" data-tab="settings" aria-label="과목 바꾸기">${esc(state.subject)}</button></h1>` +
     `<div class="seg">` + [["learn", "학습"], ["review", "복습"]].map(([id, name]) =>
       `<button type="button" data-action="fr-sub" data-value="${id}" class="${state.sub === id ? "on" : ""}">${name}</button>`).join("") + `</div>`;
 
-  const units = freeUnits();
-  html += `<h2>범위</h2>` + (units.length
-    ? `<div class="chips"><button type="button" class="rchip${state.units.length ? "" : " on"}" data-action="fr-all">전체</button>` +
-      units.map(u => `<button type="button" class="rchip${state.units.includes(u) ? " on" : ""}" data-action="fr-unit" data-value="${esc(u)}">${esc(u)}</button>`).join("") + `</div>`
-    : `<div class="empty">아직 학습한 내용이 없어요</div>`);
-
+  html += renderRange();
   const tiles = FREE_TYPES.map(t => ({ ...t, n: freePool(t.type).length }));
   if (review) tiles.push({ type: "wrong", name: "오답 노트", unit: "문제", n: freePool("wrong").length, warn: true });
   html += `<h2>시작하기</h2><div class="tiles">` + tiles.map(t =>
@@ -42,7 +51,8 @@ function renderFree() {
 }
 
 Object.assign(Actions, {
-  "fr-sub"(value) { state.sub = value; state.units = []; },
+  "fr-sub"(value) { state.sub = value; state.units = []; state.rangeOpen = false; },
+  "fr-range"() { state.rangeOpen = !state.rangeOpen; return "stay"; },
   "fr-all"() { state.units = []; return "stay"; },
   "fr-unit"(value) {
     const i = state.units.indexOf(value);

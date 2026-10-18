@@ -121,20 +121,30 @@ function renderStudyDone() {
     (again ? `<button type="button" class="primary" data-action="s-again">${againLabel}</button>` : "") + `</div></div>`;
 }
 
-// 일차 완료 축하 화면 (듀오링고처럼). 그만하면 홈으로, 더 하면 다음 일차로 이어져요.
+// 일차 완료 축하 화면 (듀오링고처럼). 다른 과목도 할지, 이 과목을 더 할지, 그만할지 물어요.
+function otherSubject() { return SUBJECTS.find(x => x !== ss.opts.subject); }
 function renderCheer() {
   const learned = ss.learned - ss.mark.learned, correct = ss.correct - ss.mark.correct;
   const solved = correct + ss.wrong - ss.mark.wrong;
   const more = !ss.done || (ss.opts.rebuild && ss.opts.rebuild().length > 0);
+  const other = otherSubject(), oq = other ? flowQueue(other) : [];
+  let ask = "", btns;
+  if (oq.length) {
+    ask = `${other}도 할까요?`;
+    btns = `<button type="button" class="primary" data-action="s-switch">${other} ${flowLabel(oq)} 하기</button>` +   // flowLabel은 home.js
+      (more ? `<button type="button" data-action="s-more">${esc(ss.opts.subject)} 더 하기</button>` : "") +
+      `<button type="button" data-action="s-exit">오늘은 그만</button>`;
+  } else if (more) {
+    ask = "더 학습할까요?";
+    btns = `<button type="button" class="primary" data-action="s-more">더 학습하기</button><button type="button" data-action="s-exit">오늘은 그만</button>`;
+  } else btns = `<button type="button" class="primary" data-action="s-exit">홈으로</button>`;
   return `<div class="card finish cheer"><div class="cheer-icon" aria-hidden="true">🎉</div>` +
-    `<div class="big">${ss.cheer + 1}일차 완료!</div><div class="stats">` +
+    `<div class="big">${esc(ss.opts.subject)} ${ss.cheer + 1}일차 완료!</div><div class="stats">` +
     `<div><b>${learned}</b><span>새로 학습</span></div>` +
     (solved ? `<div><b>${correct}/${solved}</b><span>정답</span></div>` : "") + `</div>` +
-    (more ? `<div class="ask">더 학습할까요?</div>` : "") +
-    `<div class="pager"><button type="button"${more ? "" : ` class="primary"`} data-action="s-exit">${more ? "오늘은 그만" : "홈으로"}</button>` +
-    (more ? `<button type="button" class="primary" data-action="s-more">더 학습하기</button>` : "") + `</div></div>`;
+    (ask ? `<div class="ask">${esc(ask)}</div>` : "") + `<div class="pager col">${btns}</div></div>`;
 }
-function dayComplete(d) { const p = dayProgress(d); return p.total > 0 && p.done >= p.total; }   // dayProgress는 plan.js
+function dayComplete(d) { const p = dayProgress(d, null, [ss.opts.subject]); return p.total > 0 && p.done >= p.total; }   // dayProgress는 plan.js
 
 /* ---------- 동작 ---------- */
 Object.assign(Actions, {
@@ -173,6 +183,7 @@ Object.assign(Actions, {
     ss.mark = { learned: ss.learned, correct: ss.correct, wrong: ss.wrong };
     if (ss.done) return Actions["s-again"]();   // 남은 게 오답 복습뿐이면 새로 줄을 세워 이어가요
   },
+  "s-switch"() { if (!startFlow(otherSubject())) state.screen = "tab"; },   // startFlow는 home.js
   "s-prev"() { if (canPrev()) { ss.i--; resetItem(); savePos(ss.i); } },
   "s-again"() {
     const list = ss.opts.rebuild ? ss.opts.rebuild() : [];
