@@ -197,6 +197,12 @@ body.studying #app { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 .stats b { display: block; font-size: 24px; color: var(--accent); }
 .stats span { font-size: 13px; color: var(--muted); }
 
+/* 일차 완료 축하 */
+.cheer .cheer-icon { font-size: 56px; line-height: 1; margin-bottom: 10px; animation: bounce .5s ease-out; }
+.cheer .big { font-size: 24px; color: var(--accent); }
+.cheer .ask { margin-top: 18px; font-size: 16px; font-weight: 700; }
+@keyframes bounce { 0% { transform: scale(.3); } 60% { transform: scale(1.15); } 100% { transform: none; } }
+
 /* ---- 처음 실행 안내 ---- */
 .ob { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; }
 .ob-title { font-size: 26px; font-weight: 800; margin-bottom: 10px; }

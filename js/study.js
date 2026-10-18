@@ -11,10 +11,13 @@ const ss = {
   learned: 0, correct: 0, wrong: 0, done: false,
   opts: {},        // flow(이어서 학습), wrongMode(오답 복습), posKey(마지막 위치 저장 키), rebuild(다시 하기 목록)
   reviewed: new Set(),   // 이번 학습에서 이미 기록한 개념 카드 (여러 번 뒤집어도 한 번만 세요)
+  cheer: null,     // 이어서 학습: 방금 끝낸 일차 번호 (축하 화면을 보여 줄 때만 값이 있어요)
+  mark: null,      // 이번 일차를 시작할 때의 개수 (축하 화면에서 그 일차 동안 한 개수만 보여 주려고)
 };
 
 function startStudy(list, opts) {
-  Object.assign(ss, { list: list, i: 0, learned: 0, correct: 0, wrong: 0, done: false, opts: opts || {}, reviewed: new Set() });
+  Object.assign(ss, { list: list, i: 0, learned: 0, correct: 0, wrong: 0, done: false, opts: opts || {}, reviewed: new Set(),
+    cheer: null, mark: { learned: 0, correct: 0, wrong: 0 } });
   if (ss.opts.posKey) {
     const p = Store.get(ss.opts.posKey, 0);
     if (Number.isInteger(p) && p > 0 && p < list.length) ss.i = p;
@@ -39,6 +42,7 @@ function isRight(it, x) { return it.type === "ox" ? ss.picked === x.answer : ss.
 
 /* ---------- 화면 ---------- */
 function renderStudy() {
+  if (ss.cheer !== null) return renderCheer();
   if (ss.done) return renderStudyDone();
   const it = curItem(), x = curData(), n = ss.list.length;
   const tag = ss.opts.flow ? (it.review ? "오답 복습" : (it.day + 1) + "일차") : (ss.opts.wrongMode ? "오답 복습" : "");
@@ -117,6 +121,21 @@ function renderStudyDone() {
     (again ? `<button type="button" class="primary" data-action="s-again">${againLabel}</button>` : "") + `</div></div>`;
 }
 
+// 일차 완료 축하 화면 (듀오링고처럼). 그만하면 홈으로, 더 하면 다음 일차로 이어져요.
+function renderCheer() {
+  const learned = ss.learned - ss.mark.learned, correct = ss.correct - ss.mark.correct;
+  const solved = correct + ss.wrong - ss.mark.wrong;
+  const more = !ss.done || (ss.opts.rebuild && ss.opts.rebuild().length > 0);
+  return `<div class="card finish cheer"><div class="cheer-icon" aria-hidden="true">🎉</div>` +
+    `<div class="big">${ss.cheer + 1}일차 완료!</div><div class="stats">` +
+    `<div><b>${learned}</b><span>새로 학습</span></div>` +
+    (solved ? `<div><b>${correct}/${solved}</b><span>정답</span></div>` : "") + `</div>` +
+    (more ? `<div class="ask">더 학습할까요?</div>` : "") +
+    `<div class="pager"><button type="button"${more ? "" : ` class="primary"`} data-action="s-exit">${more ? "오늘은 그만" : "홈으로"}</button>` +
+    (more ? `<button type="button" class="primary" data-action="s-more">더 학습하기</button>` : "") + `</div></div>`;
+}
+function dayComplete(d) { const p = dayProgress(d); return p.total > 0 && p.done >= p.total; }   // dayProgress는 plan.js
+
 /* ---------- 동작 ---------- */
 Object.assign(Actions, {
   "s-flip"() {
@@ -142,8 +161,17 @@ Object.assign(Actions, {
   },
   "s-next"() {
     if (!canNext()) return "stay";
-    if (ss.i < ss.list.length - 1) { ss.i++; resetItem(); savePos(ss.i); }
+    const it = curItem(), nxt = ss.list[ss.i + 1];
+    // 이어서 학습에서 한 일차의 마지막 항목을 끝냈으면 축하 화면을 띄워요
+    const dayEnd = ss.opts.flow && !it.review && (!nxt || nxt.review || nxt.day !== it.day) && dayComplete(it.day);
+    if (nxt) { ss.i++; resetItem(); savePos(ss.i); }
     else { ss.done = true; savePos(0); }
+    if (dayEnd) ss.cheer = it.day;
+  },
+  "s-more"() {
+    ss.cheer = null;
+    ss.mark = { learned: ss.learned, correct: ss.correct, wrong: ss.wrong };
+    if (ss.done) return Actions["s-again"]();   // 남은 게 오답 복습뿐이면 새로 줄을 세워 이어가요
   },
   "s-prev"() { if (canPrev()) { ss.i--; resetItem(); savePos(ss.i); } },
   "s-again"() {
