@@ -26,7 +26,7 @@ GitHub Pages로 공개하는 정적 웹앱이에요. HTML/CSS/JS만 쓰고, 서�
 - 경제·정치 기말고사 대비 앱이에요. 기능은 개념 카드, OX 퀴즈, 심화 5지선다, 오답 복습이에요.
 - 서버도 로그인도 없어요. 기록은 브라우저 localStorage(그 기기의 브라우저에 저장되는 공간)에 남아요.
 - 모바일 세로 화면이 기준이에요.
-- **아래 탭 3개**
+- **아래 탭 4개** (학습 홈 · 자유 학습 · 꾸미기 · 설정)
   - **학습 홈**: D-day, 오늘 목표 링 그래프, 동그라미 "이어서 학습" 버튼, 14일 일정 칸.
     지금의 단순하고 직관적인 모양을 유지해요.
   - **자유 학습**: 학습/복습을 고르고, 범위를 고른 뒤 칸을 누르면 바로 시작해요.
@@ -75,9 +75,10 @@ GitHub Pages로 공개하는 정적 웹앱이에요. HTML/CSS/JS만 쓰고, 서�
 | 11 | `js/free.js` | 자유 학습 탭 |
 | 12 | `js/settings.js` | 설정 탭 + 개발용 도구 |
 | 13 | `js/onboard.js` | 처음 실행 안내, `getProfile()` |
-| 14 | `js/app.js` | `state`, 화면 그리기, 클릭·입력 연결, 시작 (맨 마지막) |
+| 14 | `js/closet.js` | 캐릭터 꾸미기 탭 (소품은 나중에) |
+| 15 | `js/app.js` | `state`, 화면 그리기, 클릭·입력 연결, 시작 (맨 마지막) |
 
-- 캐릭터 그림은 `img/`에 있어요: `char-basic.png`(학습 홈), `char-happy.png`(일차 완료 축하), `char-hello.png`(처음 안내).
+- 캐릭터 그림은 `img/`에 있어요: `char-basic.png`(학습 홈), `char-happy.png`(일차 완료 축하), `char-hello.png`(처음 안내), `char-plain.png`(꾸미기 탭, 모자 없는 기본형).
   움직임은 `style.css`의 "캐릭터" 부분(CSS 애니메이션)이에요. 그림을 바꿀 때는 같은 이름으로 덮어써요.
 
 ## 버튼 이름표 규칙
@@ -94,8 +95,9 @@ GitHub Pages로 공개하는 정적 웹앱이에요. HTML/CSS/JS만 쓰고, 서�
 | `set-` | settings.js |
 | `dev-` | settings.js의 개발용 도구 |
 | `ob-` | onboard.js |
+| `c-` | closet.js |
 
-- 탭 이동은 `data-tab="home|free|settings"`로 해요.
+- 탭 이동은 `data-tab="home|free|closet|settings"`로 해요.
 - 동작이 `"stay"`를 돌려주면 스크롤 위치를 그대로 두고, `"result"`면 해설이 보이게 스크롤해요. 아무것도 안 돌려주면 맨 위로 가요.
 
 ## 저장 키 (localStorage, 실제 키 앞에 `bs:`가 붙어요. 이름을 바꾸지 마세요)

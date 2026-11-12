@@ -19,7 +19,8 @@ function renderFlowButton() {
   const started = Object.values(LEARN_KEY).some(k => Object.keys(Store.get(k, {})).length > 0);
   const label = n === 0 ? "모두<br>완료" : started ? "이어서<br>학습" : "학습<br>시작";
   const cap = n === 0 ? "14일 일정을 모두 마쳤어요" : qs.map(x => x.s + " " + flowLabel(x.q)).join(" · ");
-  return `<div class="circlewrap"><img class="char char-home" src="img/char-basic.png" alt=""><button type="button" class="circle" data-action="h-pick"${n === 0 ? " disabled" : ""}>${label}</button>` +
+  return `<div class="circlewrap"><div class="crow"><button type="button" class="circle" data-action="h-pick"${n === 0 ? " disabled" : ""}>${label}</button>` +
+    `<img class="char char-home" src="img/char-basic.png" alt=""></div>` +
     `<div class="ccap">${cap}</div></div>` + (hs.pick ? renderPicker(qs) : "");
 }
 

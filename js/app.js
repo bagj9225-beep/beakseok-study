@@ -2,7 +2,7 @@
 // 각 화면의 내용과 버튼 동작은 담당 파일에 있어요. (버튼 이름표 규칙은 ui.js 맨 위 설명)
 
 const state = {
-  tab: "home",       // 아래 탭: home(학습 홈) / free(자유 학습) / settings(설정)
+  tab: "home",       // 아래 탭: home(학습 홈) / free(자유 학습) / closet(꾸미기) / settings(설정)
   screen: "tab",     // tab(탭 화면) / onboard(처음 실행 안내) / study(학습 중)
   sub: "learn",      // 자유 학습: learn(학습) / review(복습)
   subject: Store.get("subject", SUBJECTS[0]),   // 자유 학습 과목 (설정 탭에서 바꿔요)
@@ -29,6 +29,7 @@ function render() {
   else if (state.screen === "study") html = renderStudy();
   else if (state.tab === "home") html = renderHome();
   else if (state.tab === "free") html = renderFree();
+  else if (state.tab === "closet") html = renderCloset();
   else html = renderSettings();
   document.getElementById("view").innerHTML = html;
   document.querySelectorAll("#tabbar .tab").forEach(b => {
