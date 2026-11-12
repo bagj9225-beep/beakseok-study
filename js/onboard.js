@@ -41,7 +41,7 @@ function renderOnboard() {
     buttons = `<div class="pager"><button type="button" data-action="ob-prev">이전</button>` +
       `<button type="button" class="primary" data-action="ob-start">시작하기</button></div>`;
   }
-  return `<div class="ob">${body}<div class="dots">${dots}</div>${buttons}</div>`;
+  return `<div class="ob"><img class="char char-ob" src="img/char-hello.png" alt="">${body}<div class="dots">${dots}</div>${buttons}</div>`;
 }
 
 Object.assign(Actions, {

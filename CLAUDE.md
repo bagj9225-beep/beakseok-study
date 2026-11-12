@@ -77,6 +77,9 @@ GitHub Pages로 공개하는 정적 웹앱이에요. HTML/CSS/JS만 쓰고, 서�
 | 13 | `js/onboard.js` | 처음 실행 안내, `getProfile()` |
 | 14 | `js/app.js` | `state`, 화면 그리기, 클릭·입력 연결, 시작 (맨 마지막) |
 
+- 캐릭터 그림은 `img/`에 있어요: `char-basic.png`(학습 홈), `char-happy.png`(일차 완료 축하), `char-hello.png`(처음 안내).
+  움직임은 `style.css`의 "캐릭터" 부분(CSS 애니메이션)이에요. 그림을 바꿀 때는 같은 이름으로 덮어써요.
+
 ## 버튼 이름표 규칙
 - 버튼에 `data-action="이름"`(필요하면 `data-value="값"`)을 붙이면, 누를 때 `Actions["이름"](값)`이 실행돼요.
 - 입력칸에 `data-change="이름"`을 붙이면, 값이 바뀔 때 `Actions["이름"](값)`이 실행돼요.

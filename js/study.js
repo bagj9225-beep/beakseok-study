@@ -138,7 +138,7 @@ function renderCheer() {
     ask = "더 학습할까요?";
     btns = `<button type="button" class="primary" data-action="s-more">더 학습하기</button><button type="button" data-action="s-exit">오늘은 그만</button>`;
   } else btns = `<button type="button" class="primary" data-action="s-exit">홈으로</button>`;
-  return `<div class="card finish cheer"><div class="cheer-icon" aria-hidden="true">🎉</div>` +
+  return `<div class="card finish cheer"><img class="char char-cheer" src="img/char-happy.png" alt="">` +
     `<div class="big">${esc(ss.opts.subject)} ${ss.cheer + 1}일차 완료!</div><div class="stats">` +
     `<div><b>${learned}</b><span>새로 학습</span></div>` +
     (solved ? `<div><b>${correct}/${solved}</b><span>정답</span></div>` : "") + `</div>` +
