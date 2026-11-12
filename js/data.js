@@ -38,6 +38,7 @@ function validateContent() {
   for (const it of all) {
     const type = it._type, where = `[${it._file}] ${it.id || "(id 없음)"}`;
     for (const k of REQUIRED_FIELDS[type]) {
+      if (k === "concept_id" && it[k] === null) continue;   // OX의 연결 개념은 비워 둬도 돼요 (null)
       if (!(k in it) || it[k] === "" || it[k] === null) P.push(`${where}: '${k}' 값이 비었거나 없어요`);
     }
     if (it.id) {
